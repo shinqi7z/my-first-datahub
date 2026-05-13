@@ -8,7 +8,7 @@ my first web
 
 > An interactive dashboard for art collectors and curators to manage artworks, visualize price distributions, and explore periods — built with Streamlit.
 
-![Dashboard Screenshot](https://via.placeholder.com/800x400?text=Art+Gallery+Dashboard+Screenshot)
+![Dashboard Screenshot]<img width="1306" height="822" alt="截屏2026-05-13 14 04 11" src="https://github.com/user-attachments/assets/c66ce53b-21a1-4413-9d2f-e74f55087a4f" />y+Dashboard+Screenshot)
 
 ---
 
