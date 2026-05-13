@@ -1,0 +1,79 @@
+%%writefile app.py
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+st.set_page_config(page_title="Art Gallery Dashboard", page_icon="🖼️", layout="wide")
+
+st.title("🖼️ Art Gallery Dashboard")
+st.markdown("---")
+
+# 初始化 session state 存储艺术品数据
+if "artworks" not in st.session_state:
+    st.session_state.artworks = pd.DataFrame({
+        "Title": ["Starry Night", "Mona Lisa", "The Kiss", "Girl with a Pearl Earring", "Water Lilies"],
+        "Artist": ["van Gogh", "da Vinci", "Klimt", "Vermeer", "Monet"],
+        "Year": [1889, 1503, 1907, 1665, 1916],
+        "Medium": ["Oil on canvas", "Oil on wood", "Oil on canvas", "Oil on canvas", "Oil on canvas"],
+        "Price (USD)": [100000000, 800000000, 150000000, 120000000, 90000000],
+        "Period": ["Post-Impressionism", "Renaissance", "Art Nouveau", "Baroque", "Impressionism"]
+    })
+
+# 侧边栏：添加新艺术品
+with st.sidebar:
+    st.header("➕ Add New Artwork")
+    new_title = st.text_input("Title")
+    new_artist = st.text_input("Artist")
+    new_year = st.number_input("Year", min_value=1000, max_value=2026, step=1, value=2020)
+    new_medium = st.selectbox("Medium", ["Oil on canvas", "Oil on wood", "Acrylic", "Watercolor", "Digital"])
+    new_price = st.number_input("Price (USD)", min_value=0, step=1000000, value=50000000)
+    new_period = st.selectbox("Period", ["Renaissance", "Baroque", "Impressionism", "Post-Impressionism", "Modern", "Contemporary"])
+    if st.button("Add Artwork"):
+        new_row = pd.DataFrame({
+            "Title": [new_title],
+            "Artist": [new_artist],
+            "Year": [new_year],
+            "Medium": [new_medium],
+            "Price (USD)": [new_price],
+            "Period": [new_period]
+        })
+        st.session_state.artworks = pd.concat([st.session_state.artworks, new_row], ignore_index=True)
+        st.success(f"Added {new_title}!")
+
+# 主区域：数据表格
+st.subheader("📋 Artwork Collection")
+st.dataframe(st.session_state.artworks, use_container_width=True)
+
+# 搜索/筛选：按艺术家
+st.subheader("🔍 Search by Artist")
+artist_list = st.session_state.artworks["Artist"].unique()
+selected_artist = st.selectbox("Select Artist", ["All"] + list(artist_list))
+if selected_artist != "All":
+    filtered_df = st.session_state.artworks[st.session_state.artworks["Artist"] == selected_artist]
+else:
+    filtered_df = st.session_state.artworks
+
+# 两列布局：柱状图和饼图
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📊 Artwork Prices")
+    if not filtered_df.empty:
+        fig_bar = px.bar(filtered_df, x="Title", y="Price (USD)", color="Artist",
+                         title="Price by Artwork", labels={"Price (USD)": "Price (USD)"})
+        st.plotly_chart(fig_bar, use_container_width=True)
+    else:
+        st.write("No artworks to display.")
+
+with col2:
+    st.subheader("🥧 Distribution by Period")
+    if not filtered_df.empty:
+        period_counts = filtered_df["Period"].value_counts().reset_index()
+        period_counts.columns = ["Period", "Count"]
+        fig_pie = px.pie(period_counts, names="Period", values="Count", title="Art Period Distribution")
+        st.plotly_chart(fig_pie, use_container_width=True)
+    else:
+        st.write("No data for period distribution.")
+
+st.markdown("---")
+st.caption("🎨 Art Gallery Dashboard - Powered by Streamlit")
